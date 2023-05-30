@@ -22,52 +22,37 @@ func NewEncoder(w io.Writer) *Encoder {
 	}
 }
 
-func (e *Encoder) EncodeS0C0(h *S0C0) error {
-	buf := [1]byte{byte(*h)}
-
-	_, err := e.w.Write(buf[:])
-	if err != nil {
+func (e *Encoder) EncodeS1C1(v0 S0C0, v1 *S1C1) error {
+	memory := [1537]byte{}
+	view := memory[0:0]
+	view = append(view, byte(v0))
+	view = appendS1C1(view, v1)
+	if _, err := e.w.Write(view[:]); err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func (e *Encoder) EncodeS1C1(h *S1C1) error {
-	buf := [4]byte{}
-
-	binary.BigEndian.PutUint32(buf[:], h.Time)
-	if _, err := e.w.Write(buf[:]); err != nil {
-		return err
-	}
-
-	if _, err := e.w.Write(h.Version[:]); err != nil {
-		return err
-	}
-
-	if _, err := e.w.Write(h.Random[:]); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (e *Encoder) EncodeS2C2(h *S2C2) error {
-	buf := [4]byte{}
-
-	binary.BigEndian.PutUint32(buf[:], h.Time)
-	if _, err := e.w.Write(buf[:]); err != nil {
+	memory := [1536]byte{}
+	view := memory[0:0]
+	view = appendS2C2(view, h)
+	if _, err := e.w.Write(view[:]); err != nil {
 		return err
 	}
-
-	binary.BigEndian.PutUint32(buf[:], h.Time2)
-	if _, err := e.w.Write(buf[:]); err != nil {
-		return err
-	}
-
-	if _, err := e.w.Write(h.Random[:]); err != nil {
-		return err
-	}
-
 	return nil
+}
+
+func appendS1C1(out []byte, h *S1C1) []byte {
+	out = binary.BigEndian.AppendUint32(out, h.Time)
+	out = append(out, h.Version[:]...)
+	out = append(out, h.Random[:]...)
+	return out
+}
+
+func appendS2C2(out []byte, h *S2C2) []byte {
+	out = binary.BigEndian.AppendUint32(out, h.Time)
+	out = binary.BigEndian.AppendUint32(out, h.Time2)
+	out = append(out, h.Random[:]...)
+	return out
 }

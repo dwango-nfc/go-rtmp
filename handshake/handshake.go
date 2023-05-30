@@ -52,13 +52,8 @@ func HandshakeWithClient(r io.Reader, w io.Writer, config *Config) error {
 
 	// TODO: check c0 RTMP version
 
-	// Send S0
+	// Send S0+S1
 	s0 := S0C0(RTMPVersion)
-	if err := e.EncodeS0C0(&s0); err != nil {
-		return err
-	}
-
-	// Send S1
 	s1 := S1C1{
 		Time: uint32(timeNow().UnixNano() / int64(time.Millisecond)),
 	}
@@ -66,7 +61,7 @@ func HandshakeWithClient(r io.Reader, w io.Writer, config *Config) error {
 	if _, err := rand.Read(s1.Random[:]); err != nil { // Random Seq
 		return err
 	}
-	if err := e.EncodeS1C1(&s1); err != nil {
+	if err := e.EncodeS1C1(s0, &s1); err != nil {
 		return err
 	}
 
@@ -110,13 +105,8 @@ func HandshakeWithServer(r io.Reader, w io.Writer, config *Config) error {
 	d := NewDecoder(r)
 	e := NewEncoder(w)
 
-	// Send C0
+	// Send C0+C1
 	c0 := S0C0(RTMPVersion)
-	if err := e.EncodeS0C0(&c0); err != nil {
-		return errors.Wrap(err, "Failed to encode c0")
-	}
-
-	// Send C1
 	c1 := S1C1{
 		Time: uint32(timeNow().UnixNano() / int64(time.Millisecond)),
 	}
@@ -124,7 +114,7 @@ func HandshakeWithServer(r io.Reader, w io.Writer, config *Config) error {
 	if _, err := rand.Read(c1.Random[:]); err != nil { // Random Seq
 		return err
 	}
-	if err := e.EncodeS1C1(&c1); err != nil {
+	if err := e.EncodeS1C1(c0, &c1); err != nil {
 		return errors.Wrap(err, "Failed to encode c1")
 	}
 
