@@ -72,14 +72,20 @@ type NetConnectionConnectResultInformation struct {
 }
 
 func (t *NetConnectionConnectResult) FromArgs(args ...interface{}) error {
-	properties := args[0].(map[string]interface{})
-	if err := mapstructure.Decode(properties, &t.Properties); err != nil {
-		return errors.Wrapf(err, "Failed to mapping NetConnectionConnectResultProperties")
+	if len(args) < 2 {
+		return errors.New("Failed to map NetConnectionConnectResultProperties: len(args) must be >= 2")
 	}
 
-	information := args[1].(map[string]interface{})
-	if err := mapstructure.Decode(information, &t.Information); err != nil {
-		return errors.Wrapf(err, "Failed to mapping NetConnectionConnectResultInformation")
+	if properties, ok := args[0].(map[string]interface{}); !ok {
+		return errors.New("Failed to map NetConnectionConnectResultProperties: args[0] is not a map.")
+	} else if err := mapstructure.Decode(properties, &t.Properties); err != nil {
+		return errors.Wrapf(err, "Failed to map NetConnectionConnectResultProperties")
+	}
+
+	if information, ok := args[1].(map[string]interface{}); !ok {
+		return errors.New("Failed to map NetConnectionConnectResultProperties: args[1] is not a map.")
+	} else if err := mapstructure.Decode(information, &t.Information); err != nil {
+		return errors.Wrapf(err, "Failed to map NetConnectionConnectResultInformation")
 	}
 
 	return nil
