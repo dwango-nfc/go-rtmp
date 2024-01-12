@@ -197,7 +197,9 @@ func (h *streamHandler) handleCommand(
 	if err := bodyDecoder(cmdMsg.Body, amfDec, &value); err != nil {
 		return err
 	}
-
+	if cmd, ok := value.(*message.NetStreamOnStatus); ok {
+		return h.stream.userHandler().OnStatus(timestamp, cmd)
+	}
 	err := h.handler.onCommand(chunkStreamID, timestamp, cmdMsg, value)
 	if err == internal.ErrPassThroughMsg {
 		return h.stream.userHandler().OnUnknownCommandMessage(timestamp, cmdMsg)

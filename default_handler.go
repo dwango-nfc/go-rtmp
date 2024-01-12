@@ -79,3 +79,7 @@ func (h *DefaultHandler) OnUnknownDataMessage(timestamp uint32, data *message.Da
 
 func (h *DefaultHandler) OnClose() {
 }
+
+func (h *DefaultHandler) OnStatus(timestamp uint32, cmd *message.NetStreamOnStatus) error {
+	return nil
+}

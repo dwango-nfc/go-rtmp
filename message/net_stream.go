@@ -80,7 +80,16 @@ type NetStreamOnStatusInfoObject struct {
 }
 
 func (t *NetStreamOnStatus) FromArgs(args ...interface{}) error {
-	panic("Not implemented")
+	if obj, ok := args[1].(map[string]interface{}); ok {
+		if v, ok := obj["level"].(string); ok {
+			t.InfoObject.Level = NetStreamOnStatusLevel(v)
+		}
+		if v, ok := obj["code"].(string); ok {
+			t.InfoObject.Code = NetStreamOnStatusCode(v)
+		}
+		t.InfoObject.Description, _ = obj["description"].(string)
+	}
+	return nil
 }
 
 func (t *NetStreamOnStatus) ToArgs(ty EncodingType) ([]interface{}, error) {
